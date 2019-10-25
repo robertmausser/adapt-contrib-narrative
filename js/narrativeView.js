@@ -12,7 +12,8 @@ define([
         events: {
             'click .narrative-strapline-title': 'openPopup',
             'click .narrative-controls': 'onNavigationClicked',
-            'click .narrative-indicators .narrative-progress': 'onProgressClicked'
+            'click .narrative-indicators .narrative-progress': 'onProgressClicked',
+            'click .audio-controls .icon': 'onAudioCtrlsClick'
         },
 
         preRender: function() {
@@ -26,6 +27,10 @@ define([
                 'change:_isActive': this.onItemsActiveChange,
                 'change:_isVisited': this.onItemsVisitedChange
             });
+            if(this.model.get('mobileViewWithoutPopup') && this.model.get('mobileViewWithoutPopup')._isEnabled){
+                this.$el.addClass('no-popup text-on-' + this.model.get('mobileViewWithoutPopup').itemsContentPosition);
+            }
+            this.$el.addClass("narrative-content-" + this.model.get("desktopContentPosition"));
 
             this.checkIfResetOnRevisit();
             this.calculateWidths();
@@ -190,19 +195,29 @@ define([
         },
 
         onTransitionEnd: function() {
-            if (this._isInitial) return;
-
-            var index = this.model.getActiveItem().get('_index');
-            if (this.isLargeMode()) {
-                this.$('.narrative-content-item[data-index="'+index+'"]').a11y_focus();
-            } else {
-                this.$('.narrative-strapline-title').a11y_focus();
-            }
-        },
+             var self=this;
+             var index = self.model.getActiveItem().get('_index');
+             $(".narrative-slider").find("[data-index='" + index + "']").find('img').bind('load', function() {
+                 self.setupImage(index);
+               }.bind(this));
+              if (this._isInitial) return;
+             if (this.isLargeMode()) {
+                 this.$('.narrative-content-item[data-index="'+index+'"]').a11y_focus();
+             } else {
+                 this.$('.narrative-strapline-title').a11y_focus();
+             }
+             this.setupImage(index);
+         },
+      setupImage:function(index){
+          if(!this.$el.hasClass('no-popup') && this.$el.hasClass('mode-small')) return;
+         var imageHeight = $(".narrative-slider").find("[data-index='" + index + "']").find('img').height();
+         this.$('.narrative-slide-container').velocity("stop").velocity({"height": imageHeight+"px"}, {duration: 500 }).css("overflow","hidden");
+      },
 
         setStage: function(item) {
             var index = item.get('_index');
-            if (this.isLargeMode()) {
+
+            if (this.isLargeMode()|| (this.model.get('mobileViewWithoutPopup') && this.model.get('mobileViewWithoutPopup')._isEnabled)) {
                 // Set the visited attribute for large screen devices
                 item.toggleVisited(true);
             }
@@ -243,9 +258,12 @@ define([
             event && event.preventDefault();
 
             var currentItem = this.model.getActiveItem();
+            var feedbackAudio = {};
+      			feedbackAudio._audio = currentItem._audio;
             Adapt.trigger('notify:popup', {
                 title: currentItem.get('title'),
-                body: currentItem.get('body')
+                body: currentItem.get('body'),
+                feedbackAudio: feedbackAudio
             });
 
             Adapt.on('popup:opened', function() {
