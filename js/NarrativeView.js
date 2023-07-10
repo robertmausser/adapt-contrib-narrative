@@ -322,9 +322,10 @@ class NarrativeView extends ComponentView {
   onNavigationClicked(e) {
     const $btn = $(e.currentTarget);
     let index = this.model.getActiveItem().get('_index');
-
+    
     $btn.data('direction') === 'right' ? index++ : index--;
     this.model.setActiveItem(index);
+    Adapt.trigger("audio:itemControl",`${this.model.get("_id")}-${index}`);
   }
 
   onSwipeLeft() {
@@ -340,6 +341,30 @@ class NarrativeView extends ComponentView {
   onScroll (event) {
     event.preventDefault();
     event.target.scrollTo(0, 0);
+  }
+
+ onNarrativeWidgetInview (event, visible, visiblePartX, visiblePartY) {
+    if (!visible) return;
+    switch (visiblePartY) {
+        case 'top':
+            this.hasSeenTop = true;
+            break;
+        case 'bottom':
+            this.hasSeenBottom = true;
+            break;
+        case 'both':
+            this.hasSeenTop = this.hasSeenBottom = true;
+    }
+    if (!this.hasSeenTop || !this.hasSeenBottom) return;
+   _.delay(function(){
+    Adapt.trigger("audio:itemControl", `${this.model.get("_id")}-0`);
+   }.bind(this),1000); 
+    this.$(".component__widget").off('inview.componentView');
+  }
+
+  onProgressClicked(event) {
+    const index = $(event.target).data('index');
+    this.model.setActiveItem(index);
   }
 
   /**
