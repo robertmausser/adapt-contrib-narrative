@@ -45,27 +45,30 @@ export default function Narrative(props) {
 
               <div
                 className={classes([
-                  'narrative__content-item',
+                  'narrative-item narrative__content-item',
                   _isActive && 'is-active',
-                  _isVisited && 'is-visited'
+                  _isVisited && 'is-visited',
+                  `item-${_index}-audio`
                 ])}
                 aria-hidden={!_isActive || null}
                 data-index={_index}
                 key={_index}
               >
+             <div className={classes(["item-audio-container",`${_id}-${_index}`])} audio-rendered data-audio-id={`${_id}-${_index}`}></div> 
 
                 {title &&
-                <div className="narrative__content-title">
+                <div className="narrative__content-title">     
                   <div
                     className="narrative__content-title-inner"
                     role="heading"
                     aria-level={a11y.ariaLevel({ id: _id, level: 'componentItem', override: (_ariaLevel || null) })}
                     dangerouslySetInnerHTML={{ __html: compile(title, props) }} />
                 </div>
+                          
                 }
 
                 {body &&
-                <div className="narrative__content-body">
+                <div className="narrative__content-body">                   
                   <div
                     className="narrative__content-body-inner"
                     dangerouslySetInnerHTML={{ __html: compile(body, props) }}
@@ -85,10 +88,10 @@ export default function Narrative(props) {
                   'btn-icon narrative__controls narrative__controls-left',
                   !shouldEnableBack && 'is-disabled'
                 ])}
+                aria-label={backLabel}
                 aria-disabled={!shouldEnableBack || null}
                 onClick={onNavigationClicked}
               >
-                <span className="aria-label" dangerouslySetInnerHTML={{ __html: backLabel }} />
                 <span className="icon" aria-hidden="true" />
               </button>
 
@@ -113,10 +116,10 @@ export default function Narrative(props) {
                   'btn-icon narrative__controls narrative__controls-right',
                   !shouldEnableNext && 'is-disabled'
                 ])}
+                aria-label={nextLabel}
                 aria-disabled={!shouldEnableNext || null}
                 onClick={onNavigationClicked}
               >
-                <span className="aria-label" dangerouslySetInnerHTML={{ __html: nextLabel }} />
                 <span className="icon" aria-hidden="true" />
               </button>
 
@@ -226,10 +229,10 @@ export default function Narrative(props) {
               'btn-icon narrative__controls narrative__controls-left',
               !shouldEnableBack && 'is-disabled'
             ])}
+            aria-label={backLabel}
             aria-disabled={!shouldEnableBack || null}
             onClick={onNavigationClicked}
           >
-            <span className="aria-label" dangerouslySetInnerHTML={{ __html: backLabel }} />
             <span className="icon" aria-hidden="true" />
           </button>
 
@@ -239,10 +242,10 @@ export default function Narrative(props) {
               'btn-icon narrative__controls narrative__controls-right',
               !shouldEnableNext && 'is-disabled'
             ])}
+            aria-label={nextLabel}
             aria-disabled={!shouldEnableNext || null}
             onClick={onNavigationClicked}
           >
-            <span className="aria-label" dangerouslySetInnerHTML={{ __html: nextLabel }} />
             <span className="icon" aria-hidden="true" />
           </button>
 
